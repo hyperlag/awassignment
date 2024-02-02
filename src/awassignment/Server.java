@@ -1,4 +1,5 @@
 package awassignment;
+import java.net.ServerSocket;
 
 /*
  * Also, write a corresponding server program that accepts messages from clients. It should be
@@ -11,12 +12,13 @@ The server conﬁg ﬁle should contain values deﬁning:
 • what port to listen on
 • any other value(s) you think should be conﬁgurable
  * */
-
 public class Server {
+	private static ServerSocket server;
 	//Syntax: Server <output directory> <listen port> <anthing else>
 	public static void main(String[] args) {
 		String outDir;
 		int port;
+		ServerSocket server;
 		if (args.length == 2) {
 			System.out.println("");
 			outDir = args[0];
@@ -28,9 +30,37 @@ public class Server {
 		System.out.println("---------------------------------------");
 		System.out.println("-----Welcome to the Server App---------");
 		System.out.println("-Output Directory: " + outDir);
+		connect(port);
 		System.out.println("-Listening on localhost:" + port );
 		System.out.println("---------------------------------------");
+		
 
+		
+		//Done
+		disconnect();
+	}
+	
+	private static void loop() {
+		while (true) {
+			
+		}
+	}
+	
+	private static void connect(int listenPort) {
+		try { 
+			server = new ServerSocket(listenPort);
+		} catch (Exception e) {
+			System.err.println("Error starting socket " + e.getMessage());
+		}
 	}
 
+	private static void disconnect() {
+		try {
+			server.close();
+		} catch (Exception e) {
+			System.err.println("Error shutting down socker " + e.getMessage());
+		}
+	}
+	
+	
 }
