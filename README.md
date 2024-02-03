@@ -11,7 +11,7 @@ in the execution arguments. If any of those files are .properties files, they wi
 supplied regex and transmit them to the server application. Upon transmission, the original file is deleted (if 
 the <delete after> option is not set to false). 
 
-The Client application will continue to look for new files. In the case where <delete after> has been set to false, 
+The Client application will continue to look for new files. In the case where the `<delete after>` argument has been set to false, 
 the Client will periodically check MD5 checksums and transmit updates if any exisiting files change.
 
 If you wish to directly run the jar files I have supplied and you happen to be running bash, two example run scripts have been provided.
@@ -44,7 +44,7 @@ Arguments are:
 
 This will start the Client application watching the directory "input" for new files. It will also filter only 
 Properties with keys that end in "Delim". The default server address is assumed to be localhost and the port 
-is set ot 1337. The optional delete option has been set to true, but it can also be left out entirely. 
+is set ot 1337. The optional delete argument has been set to true, but it can also be left out entirely. 
 Setting this to false will cause the Client to update on change but not delete the file.
 
 ## This will execut the command:
@@ -53,7 +53,7 @@ Setting this to false will cause the Client to update on change but not delete t
 
 Arguments are: 
 
-`<directory> <key filter> <server address> <server port> <delete after (This is optional.  Default is true)>`
+`<directory> <key filter> <server address> <server port> <delete after(This is optional.Default is true)>`
 
 
 # Building 
