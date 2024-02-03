@@ -25,8 +25,10 @@ If you wish to directly run the jar files I have supplied and you happen to be r
 
 This will start the server application with the output directory set to "out" and the listen port "1337".
 
-## This will execute the command:
-`$java -jar Server.jar out 1337`
+## This will execute the commands:
+`$mkdir out 2>/dev/null`
+ 
+ `$java -jar Server.jar out 1337`
 
 Arguments are: 
 
@@ -57,10 +59,10 @@ Arguments are:
 
 
 # Building 
-For ease of review, nothing special is require to build the applications from scratch.
+For ease of review, nothing special is required to build the applications from scratch.
 
 ## Client
-To manually build the Client perform the following command in the project directory:
+To manually build the Client, perform the following command in the project directory:
 
 `javac src/awassignment/Client.java`
 
@@ -70,7 +72,7 @@ Once built, it can be run with the following command:
 
 
 ## Server
-To manually build the Server perform the following command in the project directory:
+To manually build the Server, perform the following command in the project directory:
 
 `javac src/awassignment/Server.java`
 
