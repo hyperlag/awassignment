@@ -127,8 +127,12 @@ public class Client {
 
                     // Send the filtered properties file to the server
                     sendFile(monitoredFiles.get(checksum), serverAddress, serverPort);
+                    
+                    // Delete the file
+                    files[i].delete();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    System.err.println("Error processing files. Please restart client " + e.getMessage());
+                    System.exit(0);
                 }
 
             }
