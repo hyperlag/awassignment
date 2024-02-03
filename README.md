@@ -4,7 +4,7 @@ Hello and welcome to my attempt at a simple implimentation of the assignment tha
 
 # Overview
 The server application must be run first. It will listen on the supplied port for Client connections and write 
-properities files to the supplied ouotput directory upon recipt.
+properities files to the supplied output directory upon recipt.
 
 Once the server is running, the Client application can be started. It will read all files in the directory supplied
 in the execution arguments. If any of those files are .properties files, they will be filtered based on the 
