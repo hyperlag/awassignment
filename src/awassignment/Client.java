@@ -203,15 +203,18 @@ public class Client {
      */
     private static void sendFile(Properties properties, String address, int port) {
         try {
-            Socket socket;
-            ObjectOutputStream oos;
+            // Make a new Socket with the server info supplied
+            Socket socket  = new Socket(address, port);
+            // Setup an output stream
+            ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
 
-            socket = new Socket(address, port);
-            oos = new ObjectOutputStream(socket.getOutputStream());
-            System.out.println("Sending request to Socket Server");
+            //Print some console info for the user
+            System.out.println("Sending request to Socket Server at " + address + ":" + port);
 
+            // Send the properties file
             oos.writeObject(properties);
 
+            //Clean up
             oos.close();
             socket.close();
         } catch (Exception e) {
@@ -219,7 +222,6 @@ public class Client {
             System.err.println("Error communicating with server at " + address + ":" + port
                     + ". Please ensure it is running and restart the client.");
             // If this fails we just shut down. Restarting the client will re-synchronize
-            // the files.
             System.exit(0);
         }
     }
