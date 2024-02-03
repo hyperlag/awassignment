@@ -94,7 +94,7 @@ public class Client {
     }
 
     /**
-     * 
+     * Process the files in the directory.
      * 
      * @param dir           Input directory to watch for new files or changes
      * @param filter        Regex filter to apply to properties file key
