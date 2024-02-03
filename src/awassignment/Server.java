@@ -23,7 +23,7 @@ public class Server {
     /**
      * Server application main.
      * 
-     * @param args <output directory> <listen port> <anthing else>
+     * @param args <output directory> <listen port>
      */
     public static void main(String[] args) {
         String outDir;

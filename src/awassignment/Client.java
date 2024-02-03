@@ -60,7 +60,7 @@ public class Client {
             serverPort = Integer.parseInt(args[3]);
 
         } else { // Print usage statement if argument check fails
-            System.err.println("Required arguments: <watched directory> <key filter> <server address> <delete after>");
+            System.err.println("Required arguments: <watched directory> <key filter> <server address> <server port> <delete after (optional)>");
             return;
         }
 
