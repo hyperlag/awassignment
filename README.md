@@ -28,7 +28,7 @@ This will start the server application with the output directory set to "out" an
 ## This will execut the command:
 >$java -jar Server.jar out 1337
 
-Arguments are: <output directory> and <listen port>
+Arguments are: '<output directory> and <listen port>'
 
 
 # Running the Client Application (via the provided jar file) 
@@ -46,7 +46,7 @@ Setting this to false will cause the Client to update on change but not delete t
 ## This will execut the command:
 >$java -jar Client.jar input '.*Delim$' localhost 1337 true
 
-Arguments are: <directory> <key filter> <server address> <server port> <delete after (optional. Default true)>
+Arguments are: '<directory> <key filter> <server address> <server port> <delete after (optional. Default true)>'
 
 
 # Building 
