@@ -1,172 +1,223 @@
 package awassignment;
 
 import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigInteger;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 
-/*
- Write a Java (client) program that monitors a directory. When a new Java proper9es ﬁle
-appears in the monitored directory, it should process it as follows:
-1) Read the ﬁle into a Map
-2) Apply a regular expression paEern ﬁlter for the keys (i.e., remove key/value mappings
-where keys do not match a conﬁgurable regular expression paEern).
-3) Relay the ﬁltered mappings to a server program
-4) Delete the ﬁle
-The client program’s main method should accept an argument specifying a conﬁg ﬁle path. The
-client conﬁg ﬁle should contain values deﬁning:
-• the directory path that will be monitored
-• the key ﬁltering paEern that will be applied
-• the address of the corresponding server program
-• any other value(s) you think should be conﬁgurable
+/**
+ * Client Application.
+ * 
+ * I put everything into this class as static functions to contain it and make
+ * it easy to review. In the real world, I would spend time making reusable
+ * functionality in more generic classes.
+ * 
  */
-
-
 public class Client {
-	private static HashMap<String, Properties> monitoredFiles = new HashMap<String, Properties>();
-	private static final String filenameKey = "PLACEHOLDER ENTRY FILENAME";
-	// Syntax: Client <directory> <key filter> <server address> <server port>
-	public static void main(String[] args) {
-		String dir;
-		String keyFilter;
-		String serverAddr;
-		int serverPort;
-		if (args.length == 4) {
-			System.out.println("");
-			dir = args[0];
-			keyFilter = args[1];
-			serverAddr = args[2];
-			serverPort = Integer.parseInt(args[3]);
-			
-		} else {
-			System.err.println("Required arguments: <watched directory> <key filter> <server address>");
-			return;
-		}
-		System.out.println("---------------------------------------");
-		System.out.println("-----Welcome to the Client App---------");
-		System.out.println("-Monitoring Directory: " + dir);
-		System.out.println("-Connecting to server: " + serverAddr );
-		System.out.println("-Filtering Keys with pattern: " + keyFilter);
-		System.out.println("---------------------------------------");
-		loop(dir, keyFilter, serverAddr, serverPort);
+    // HashMap of Properties (also implements Map), keyed on the MD5 checksum of the
+    // file
+    private static HashMap<String, Properties> monitoredFiles = new HashMap<String, Properties>();
 
-	}
-	
-	/**
-	 * Simple loop to check for new files.
-	 * String dir - Directory to watch
-	 */
-	public static void loop(String dir, String filter, String serverAddress, int serverPort) {
-		File folder = new File(dir);
-		File[] files;
-		while (folder != null) {
-			 processFiles(dir, filter, serverAddress, serverPort);
-		}
+    // Internal key used to store the filename of a properties file in its
+    // associated Properties object.
+    // It has a delim and a hash in it to be 200% sure it does not collide with real data.
+    private static final String filenameKey = "PLACEHOLDER ENTRY FILENAME : bb1b365b692f1d2fb5400121313981ea";
 
-	}
-	
-	/*
-	 * String dir - directory to search
-	 * 
-	 * Returns a list of .properties files
-	 */
-	public static void processFiles(String dir, String filter, String serverAddress, int serverPort) {
-		File folder = new File(dir);
-		File[] files = folder.listFiles();
-		int numOfFiles = 0;
-		for(int i=0;i<files.length;i++) {
-			//Check if this is a new or modified file
-			if(files[i].getName().toLowerCase().endsWith(".properties") && !monitoredFiles.containsKey(md5(files[i]))) {
-				System.out.println("Found: " + files[i].getName());
-				numOfFiles++;
-				String checksum = md5(files[i]);
-				System.out.println("MD5: " + checksum);
-				//Read the properties file and make a hashmap
-				Properties properties = new Properties();
-				try {
-					properties.load(new FileInputStream(files[i]));
-					for(Entry<Object, Object> e : properties.entrySet()) {
-			            System.out.println("Entry found: " + e);
-			            //TODO: Apply filters
-			        }
-					//Store the name of the file within the property itself in a placeholder entry
-					properties.put(filenameKey, files[i].getName()); //Make the key unlikely to stamp on another real one
-					//Add the new properties file to the map
-					monitoredFiles.put(checksum, properties);
-					//TODO: Upload filtered properties to server
-					applyFilter(checksum,filter);
-					
-					sendFile(monitoredFiles.get(checksum), serverAddress, serverPort);
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+    /**
+     * Main class for the Client application.
+     * 
+     * @param args <directory> <key filter> <server address> <server port>
+     */
+    public static void main(String[] args) {
+        String dir;
+        String keyFilter;
+        String serverAddr;
+        int serverPort;
 
-			}
-		}
-	}
-	
-	private static void applyFilter(String md5key, String filter) {
-		Properties properties = monitoredFiles.get(md5key);
-		for (Object key : properties.keySet()) {
-			if (!((String)key).contains(filenameKey) && !((String)key).matches(filter)) {
-				System.out.println("Applying filter " + filter + " to: " + (String)key);
-				monitoredFiles.get(md5key).remove((String)key);
-			}
-			
-		}
-	}
-	
-	/*
-	 * Generates checksum so that file is only updated if contents change.
-	 * 
-	 * @param file file to generate MD5 checksum
-	 * @return
-	 */
-	public static String md5(File file) {
-		byte[] data;
-		byte[] hash = null;
-		try {
-			data = Files.readAllBytes(Paths.get(file.getPath()));
-			hash = MessageDigest.getInstance("MD5").digest(data);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+        // Only run if the correct number of arguments were supplied
+        if (args.length == 4) {
+            System.out.println("");
+            dir = args[0];
+            keyFilter = args[1];
+            serverAddr = args[2];
+            serverPort = Integer.parseInt(args[3]);
 
-		return new BigInteger(1, hash).toString(16);
-	}
-	
-	public static void sendFile(Properties properties, String address, int port) {
-		try {
-			InetAddress host = InetAddress.getLocalHost(); //Assuming this is only going to be used on localhost
-	        Socket socket;
-	        ObjectOutputStream oos;
-	
-	
-	        socket = new Socket(address, port);
-	        oos = new ObjectOutputStream(socket.getOutputStream());
-	        System.out.println("Sending request to Socket Server");
-	   
-	        oos.writeObject(properties);
-	    
-	        oos.close();
-		} catch (Exception e) {
-			
-		}
-	}
-	
+        } else { // Print usage statement if argument check fails
+            System.err.println("Required arguments: <watched directory> <key filter> <server address>");
+            return;
+        }
+
+        // Startup message
+        System.out.println("---------------------------------------");
+        System.out.println("-----Welcome to the Client App---------");
+        System.out.println("-Monitoring Directory: " + dir);
+        System.out.println("-Connecting to server: " + serverAddr);
+        System.out.println("-Filtering Keys with pattern: " + keyFilter);
+        System.out.println("---------------------------------------");
+
+        loop(dir, keyFilter, serverAddr, serverPort);
+
+    }
+
+    /**
+     * Function to loop forever and call out to the function that processes the file
+     * changes.
+     * 
+     * @param dir           Input directory to watch for new files or changes
+     * @param filter        Regex filter to apply to properties file key
+     * @param serverAddress Address of the server
+     * @param serverPort    Server port
+     */
+    public static void loop(String dir, String filter, String serverAddress, int serverPort) {
+        File folder = new File(dir);
+        while (folder != null) {
+            processFiles(dir, filter, serverAddress, serverPort);
+        }
+
+    }
+
+    /**
+     * 
+     * 
+     * @param dir           Input directory to watch for new files or changes
+     * @param filter        Regex filter to apply to properties file key
+     * @param serverAddress Address of the server
+     * @param serverPort    Server port
+     */
+    public static void processFiles(String dir, String filter, String serverAddress, int serverPort) {
+        File folder = new File(dir);
+
+        // Make an array of files in the directory
+        File[] files = folder.listFiles();
+
+        // Check every file in the directory
+        for (int i = 0; i < files.length; i++) {
+            // Condition to check if this file is both a new file and if it is a
+            // ".properties" file
+            if (files[i].getName().toLowerCase().endsWith(".properties")
+                    && !monitoredFiles.containsKey(md5(files[i]))) {
+                System.out.println("---------------------------------------");
+                System.out.println("Found: " + files[i].getName());
+                // Generate checksum of the file to ensure it is new.
+                String checksum = md5(files[i]);
+                System.out.println("MD5: " + checksum);
+
+                // Make a new Properties object to store the new file
+                Properties properties = new Properties();
+                try {
+                    // Load all the properties from the file into the Properties object
+                    properties.load(new FileInputStream(files[i]));
+
+                    // Add an interim property inside the Property object to contain the filename.
+                    // This gets removed by the server on write-out
+                    properties.put(filenameKey, files[i].getName());
+
+                    // Add the new properties file to the HashMap
+                    monitoredFiles.put(checksum, properties);
+
+                    // Remove any keys that do not match the supplied filter (excluding the internal
+                    // filename key)
+                    applyFilter(checksum, filter);
+
+                    // Send the filtered properties file to the server
+                    sendFile(monitoredFiles.get(checksum), serverAddress, serverPort);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }
+    }
+
+    /**
+     * This method calls up the properties file from the HashMap and removes entries
+     * that do not have a regex match with the supplied filter.
+     * 
+     * @param md5key MD5 checksum key for the properties file to be filtered
+     * @param filter Regex to apply
+     */
+    private static void applyFilter(String md5key, String filter) {
+        // Get the unfiltered properties object
+        Properties properties = monitoredFiles.get(md5key);
+
+        // Check every key in the key set
+        for (Object key : properties.keySet()) {
+            // Apply filter if the key is both not the internal filename key and if it does
+            // not match the filter
+            if (!((String) key).contains(filenameKey) && !((String) key).matches(filter)) {
+                // Print some user information
+                System.out.println("Applying filter " + filter + " to: " + (String) key);
+
+                // Remove the entry
+                monitoredFiles.get(md5key).remove((String) key);
+            }
+
+        }
+    }
+
+    /*
+     * Generates checksum so that file is only updated if contents change.
+     * 
+     * @param file file to generate MD5 checksum
+     * 
+     * @return MD5 checksum as a string
+     */
+    public static String md5(File file) {
+        byte[] data;
+        byte[] hash = null;
+        try {
+            // Load the whole file into a byte array
+            data = Files.readAllBytes(Paths.get(file.getPath()));
+            // Use the MessageDigest class to digest that previous byte array into a
+            // checksum hash
+            hash = MessageDigest.getInstance("MD5").digest(data);
+        } catch (Exception e) { // In the real world, this would be part of a larger error management strategy
+            System.err.println("Error generating MD5. Please restart client. " + e.getMessage());
+            // Shutting down client to avoid corrupt data in the map. Restarting will resync
+            // the data.
+            System.exit(0);
+        }
+
+        // Turn the hash into String and return it.
+        return new BigInteger(1, hash).toString(16);
+    }
+
+    /**
+     * This method opens up a socket and sends the Properties file passed to it to
+     * the server specified.
+     * 
+     * @param properties Properties file to send to the server (with special
+     *                   internal filename entry).
+     * @param address    Address of the server
+     * @param port       Server port.
+     */
+    private static void sendFile(Properties properties, String address, int port) {
+        try {
+            Socket socket;
+            ObjectOutputStream oos;
+
+            socket = new Socket(address, port);
+            oos = new ObjectOutputStream(socket.getOutputStream());
+            System.out.println("Sending request to Socket Server");
+
+            oos.writeObject(properties);
+
+            oos.close();
+            socket.close();
+        } catch (Exception e) {
+            // Error message on failure
+            System.err.println("Error communicating with server at " + address + ":" + port
+                    + ". Please ensure it is running and restart the client.");
+            // If this fails we just shut down. Restarting the client will re-synchronize
+            // the files.
+            System.exit(0);
+        }
+    }
 
 }
