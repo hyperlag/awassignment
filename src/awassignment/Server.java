@@ -1,9 +1,11 @@
 package awassignment;
+import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Properties;
+import java.io.OutputStream;
 
 /*
  * Also, write a corresponding server program that accepts messages from clients. It should be
@@ -39,22 +41,24 @@ public class Server {
 		System.out.println("-Listening on localhost:" + port );
 		System.out.println("---------------------------------------");
 		
-		loop();
+		loop(outDir);
 		
 		//Done
 		disconnect();
 	}
 	
-	private static void loop() {
+	private static void loop(String outDir) {
 		try {
 			while (true) {
 	            Socket socket = server.accept();
 	            ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
 	            Properties properties = (Properties) ois.readObject();
-	            System.out.println("File Update received: " + properties.getProperty(filenameKey));
+	            String filename = properties.getProperty(filenameKey);
+	            System.out.println("File Update received: " + filename);
 	            properties.remove(filenameKey);//Remove the placeholder before writing out the file
 	            //TODO write out the file
-	            //ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+	            
+	            writeFile(filename, outDir, properties);
 	
 	            ois.close();
 	            //oos.close();
@@ -63,6 +67,17 @@ public class Server {
 		} catch (Exception e) {
 			
 		}
+	}
+	
+	private static void writeFile(String filename, String dir, Properties properties) {
+		try (OutputStream output = new FileOutputStream(dir + "/" + filename)) {
+			System.out.println("Writing out " + dir + "/" + filename);
+			properties.store(output,null);
+			System.out.println(properties);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 	}
 	
 	private static void connect(int listenPort) {
