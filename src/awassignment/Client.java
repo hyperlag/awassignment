@@ -37,7 +37,7 @@ client conﬁg ﬁle should contain values deﬁning:
 
 public class Client {
 	private static HashMap<String, Properties> monitoredFiles = new HashMap<String, Properties>();
-	
+	private static final String filenameKey = "PLACEHOLDER ENTRY FILENAME";
 	// Syntax: Client <directory> <key filter> <server address> <server port>
 	public static void main(String[] args) {
 		String dir;
@@ -103,17 +103,30 @@ public class Client {
 			            //TODO: Apply filters
 			        }
 					//Store the name of the file within the property itself in a placeholder entry
-					properties.put("PLACEHOLDER ENTRY FILENAME", files[i].getName()); //Make the key unlikely to stamp on another real one
+					properties.put(filenameKey, files[i].getName()); //Make the key unlikely to stamp on another real one
 					//Add the new properties file to the map
 					monitoredFiles.put(checksum, properties);
 					//TODO: Upload filtered properties to server
-					sendFile(properties, serverAddress, serverPort);
+					applyFilter(checksum,filter);
+					
+					sendFile(monitoredFiles.get(checksum), serverAddress, serverPort);
 					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 
 			}
+		}
+	}
+	
+	private static void applyFilter(String md5key, String filter) {
+		Properties properties = monitoredFiles.get(md5key);
+		for (Object key : properties.keySet()) {
+			if (!((String)key).contains(filenameKey) && !((String)key).matches(filter)) {
+				System.out.println("Applying filter " + filter + " to: " + (String)key);
+				monitoredFiles.get(md5key).remove((String)key);
+			}
+			
 		}
 	}
 	
