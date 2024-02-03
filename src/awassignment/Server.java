@@ -1,5 +1,9 @@
 package awassignment;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.Properties;
 
 /*
  * Also, write a corresponding server program that accepts messages from clients. It should be
@@ -14,6 +18,7 @@ The server conﬁg ﬁle should contain values deﬁning:
  * */
 public class Server {
 	private static ServerSocket server;
+	private static final String filenameKey = "PLACEHOLDER ENTRY FILENAME";
 	//Syntax: Server <output directory> <listen port> <anthing else>
 	public static void main(String[] args) {
 		String outDir;
@@ -34,14 +39,28 @@ public class Server {
 		System.out.println("-Listening on localhost:" + port );
 		System.out.println("---------------------------------------");
 		
-
+		loop();
 		
 		//Done
 		disconnect();
 	}
 	
 	private static void loop() {
-		while (true) {
+		try {
+			while (true) {
+	            Socket socket = server.accept();
+	            ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+	            Properties properties = (Properties) ois.readObject();
+	            System.out.println("File Update received: " + properties.getProperty(filenameKey));
+	            properties.remove(filenameKey);//Remove the placeholder before writing out the file
+	            //TODO write out the file
+	            //ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+	
+	            ois.close();
+	            //oos.close();
+	            socket.close();
+			}
+		} catch (Exception e) {
 			
 		}
 	}
