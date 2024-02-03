@@ -28,20 +28,31 @@ public class Client {
     // associated Properties object.
     // It has a delim and a hash in it to be 200% sure it does not collide with real data.
     private static final String filenameKey = "PLACEHOLDER ENTRY FILENAME : bb1b365b692f1d2fb5400121313981ea";
+    
+    // If false, the file will not be deleted on transmit
+    private static Boolean deleteAfterXmit= true;
 
     /**
      * Main class for the Client application.
      * 
-     * @param args <directory> <key filter> <server address> <server port>
+     * The optional <delete after> argument allows you to keep the source file upon transmission if desired.
+     * Set this to false to retain.
+     * 
+     * @param args <directory> <key filter> <server address> <server port> <delete after>
      */
     public static void main(String[] args) {
         String dir;
         String keyFilter;
         String serverAddr;
         int serverPort;
+        
+        // If the optional delete argument is supplied, parse it
+        if (args.length == 5) {
+            deleteAfterXmit = Boolean.parseBoolean(args[4]);
+        }
 
         // Only run if the correct number of arguments were supplied
-        if (args.length == 4) {
+        if (args.length >= 4) {
             System.out.println("");
             dir = args[0];
             keyFilter = args[1];
@@ -49,7 +60,7 @@ public class Client {
             serverPort = Integer.parseInt(args[3]);
 
         } else { // Print usage statement if argument check fails
-            System.err.println("Required arguments: <watched directory> <key filter> <server address>");
+            System.err.println("Required arguments: <watched directory> <key filter> <server address> <delete after>");
             return;
         }
 
@@ -128,8 +139,10 @@ public class Client {
                     // Send the filtered properties file to the server
                     sendFile(monitoredFiles.get(checksum), serverAddress, serverPort);
                     
-                    // Delete the file
-                    files[i].delete();
+                    // Only delete if the option is set
+                    if(deleteAfterXmit) {
+                        files[i].delete();
+                    }
                 } catch (Exception e) {
                     System.err.println("Error processing files. Please restart client " + e.getMessage());
                     System.exit(0);
